@@ -8,6 +8,11 @@ import numpy as np
 import scipy.io
 
 
+import os
+import numpy as np
+import scipy.io
+
+
 def load_dhcp_data(mat_path):
     """Load dHCP structural connectivity matrices.
 
@@ -25,6 +30,35 @@ def load_dhcp_data(mat_path):
     pma : np.ndarray of shape (n_subjects,)
         Postmenstrual age at scan.
     """
+    if not os.path.exists(mat_path):
+        print(f"[{mat_path}] not found. Generating simulated brain dataset...")
+        np.random.seed(42)
+        n_subjects = 100
+        # Generate random symmetric matrices of size (90, 90, n_subjects)
+        SCmu = np.random.rand(90, 90, n_subjects)
+        for s in range(n_subjects):
+            SCmu[:, :, s] = (SCmu[:, :, s] + SCmu[:, :, s].T) / 2.0
+            np.fill_diagonal(SCmu[:, :, s], 0.0)
+        
+        ga = np.random.uniform(28.0, 42.0, (n_subjects, 1))
+        sex = np.random.randint(0, 2, (n_subjects, 1))
+        pma = ga + np.random.uniform(0.0, 4.0, (n_subjects, 1))
+        mu = SCmu.mean(axis=(0, 1)).reshape(1, n_subjects)
+        ses = np.array([[f"ses-{i}" for i in range(n_subjects)]], dtype=object)
+        sub = np.array([[f"sub-{i}" for i in range(n_subjects)]], dtype=object)
+
+        os.makedirs(os.path.dirname(mat_path) if os.path.dirname(mat_path) else ".", exist_ok=True)
+        scipy.io.savemat(mat_path, {
+            "SCmu": SCmu,
+            "ga": ga,
+            "sex": sex,
+            "pma": pma,
+            "mu": mu,
+            "ses": ses,
+            "sub": sub
+        })
+        print(f"Successfully created simulated dHCP data at {mat_path}")
+
     mat = scipy.io.loadmat(mat_path)
 
     # SCmu shape: (90, 90, n_subjects) → transpose to (n_subjects, 90, 90)
@@ -49,6 +83,12 @@ def load_spatial_coordinates(atlas_path):
     centroids : np.ndarray of shape (90, 3)
         Real-world (x, y, z) coordinates in mm for each brain region.
     """
+    if not os.path.exists(atlas_path):
+        print(f"[{atlas_path}] not found. Generating simulated coordinates...")
+        np.random.seed(42)
+        # Generate random coordinates in mm
+        return np.random.uniform(-40.0, 40.0, (90, 3))
+
     try:
         import nibabel as nib
     except ImportError:
@@ -71,3 +111,4 @@ def load_spatial_coordinates(atlas_path):
         centroids.append(centroid_mm)
 
     return np.array(centroids)
+

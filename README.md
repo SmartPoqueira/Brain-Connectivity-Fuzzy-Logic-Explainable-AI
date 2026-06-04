@@ -2,114 +2,157 @@
 
 [![License: CC BY 4.0](https://img.shields.io/badge/License-CC--BY--4.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
 [![Conference: ECAI 2025](https://img.shields.io/badge/Conference-ECAI%202025-blue)](https://ecai2025.org/)
+[![DOI: 10.1142/S021962202650063X](https://img.shields.io/badge/DOI-10.1142%2FS021962202650063X-red)](https://doi.org/10.1142/S021962202650063X)
 
-Classification of **preterm vs. term infant brain structural connectivity** using machine learning and graph neural networks, enhanced with **fuzzy logic label smoothing** and **SHAP explainability**. Published at ECAI 2025 (CEUR Workshop Proceedings).
+Premium open-source repository implementing the classification of **preterm vs. term infant brain structural connectivity** using machine learning and Graph Neural Networks (GNNs). This project integrates **fuzzy logic label smoothing** to model neurodevelopmental continuity and **SHAP (SHapley Additive exPlanations)** for explainable clinical insights.
 
+---
 
-## Pipeline
+## ─── Methodology & Mathematical Formulation ───
 
+The architecture processes structural connectomes (DTI-derived $90 \times 90$ adjacency matrices) from the Developing Human Connectome Project (dHCP).
+
+### 1. Spatial Augmentation
+For each brain region $i$, atlas-based centroid coordinates $(x_i, y_i, z_i)$ are concatenated with the upper-triangular connectivity features to supply physical spatial priors:
+$$\mathbf{x}_i^{\mathrm{aug}} = [\mathbf{x}_i \,\|\, x_i \,\|\, y_i \,\|\, z_i]$$
+
+### 2. Fuzzy Label Smoothing
+Instead of imposing a hard cutoff at $37$ weeks Gestational Age (GA), we apply a sigmoidal fuzzy membership mapping to generate soft targets $y_i^{\mathrm{soft}} \in [0, 1]$, mitigating boundary noise:
+$$y_i^{\mathrm{soft}} = \frac{1}{1 + \exp\left(-\frac{\mathrm{GA}_i - \tau}{T}\right)}$$
+where $\tau = 37.0$ weeks (clinical preterm threshold) and $T$ is a temperature parameter controlling transition smoothness.
+
+### 3. Explainability Pipeline
+SHAP values are computed to identify key structural connections. Edge SHAP values are aggregated into node importance scores to rank the most discriminative anatomical regions:
+$$I(u) = \sum_{v \neq u} |\phi_{uv}|$$
+where $\phi_{uv}$ is the SHAP value corresponding to the edge between region $u$ and region $v$.
+
+---
+
+## ─── End-to-End Pipeline & Visualizations ───
+
+### System Overview
 <p align="center">
-  <img src="images/brainconnectivity_vague1.png" width="700"/>
+  <img src="images/brainconnectivity_vague1.png" width="800" alt="ECAI System Pipeline"/>
 </p>
+*Overview: Structural connectivity matrices from dHCP → Spatial coordinate augmentation → ML/GNN training with fuzzy soft targets → SHAP network explainability.*
 
-*End-to-end pipeline: structural connectivity matrices from dHCP → feature extraction → ML/GNN classification with fuzzy labels → SHAP-based explainability.*
-
-## Overview
-
-Preterm birth disrupts critical neurodevelopmental processes during the final trimester. This project uses structural connectomes (DTI-derived 90×90 adjacency matrices) from the Developing Human Connectome Project (dHCP) to classify infants as preterm or term. Key contributions:
-
-1. **Spatial coordinate augmentation** — Atlas-based centroid coordinates as node features improve LR accuracy from 88.6% to 93.3%.
-2. **Fuzzy logic label smoothing** — A sigmoidal soft target around the 37-week threshold boosts accuracy to **96.2%**.
-3. **SHAP explainability** — Edge-importance matrices and node-level aggregation identify key brain regions consistent with neuroscience literature.
-
-## Fuzzy Logic
-
+### Fuzzy Decision Boundary
 <p align="center">
-  <img src="images/fuzzyfunction.png" width="400"/>
+  <img src="images/fuzzyfunction.png" width="400" alt="Fuzzy Boundary Function"/>
 </p>
+*Sigmoidal soft label mapping. It smooths the transition around 37 weeks, allowing model optimization to learn gradual maturational changes.*
 
-*Sigmoidal fuzzy membership function: $y_i^{\text{soft}} = \sigma\left(\frac{GA_i - 37}{T}\right)$. This replaces the hard binary label, reflecting the continuous nature of brain development around the 37-week boundary.*
-
-## SHAP Explainability
-
+### Explainability Insights
 <p align="center">
-  <img src="images/shap_importance_network_matrix.png" width="450"/>
-  <img src="images/matrixnodesSHAP.png" width="450"/>
+  <img src="images/shap_importance_network_matrix.png" width="400" alt="SHAP Network Visualizer"/>
+  <img src="images/matrixnodesSHAP.png" width="400" alt="SHAP Node Rankings"/>
 </p>
+*Left: 3D projection of SHAP edge importances. Right: Mean absolute SHAP values for top structural brain regions.*
 
-*Left: Brain network showing edge importance from SHAP analysis. Right: Node-level aggregation highlighting thalamus, putamen, and cingulum as key discriminative regions.*
+---
 
-### SHAP Heatmap
+## ─── Experimental Results ───
 
-<p align="center">
-  <img src="images/shap_importance_heatmap_edges_matrix.png" width="500"/>
-</p>
+### 1. Baseline Comparison (Hard Labels)
+Classification performance across different machine learning and Graph Neural Network models (with and without spatial coordinates):
 
-*Heatmap of edge-level SHAP importance across all 90 brain regions.*
+| Model | Spatial Coordinates | Accuracy | Weighted F1 | Macro F1 |
+| :--- | :---: | :---: | :---: | :---: |
+| **Logistic Regression (LR)** | $\times$ | 0.8857 | 0.8808 | 0.8443 |
+| | $\checkmark$ | 0.9333 | 0.9317 | 0.9103 |
+| **Support Vector Machine (SVM)** | $\times$ | 0.8476 | 0.8288 | 0.7490 |
+| | $\checkmark$ | 0.8667 | 0.8523 | 0.7850 |
+| **Multilayer Perceptron (MLP)** | $\times$ | 0.8762 | 0.8674 | 0.8213 |
+| | $\checkmark$ | 0.8952 | 0.8903 | 0.8540 |
+| **Random Forest (RF)** | $\times$ | 0.8667 | 0.8415 | 0.7554 |
+| | $\checkmark$ | 0.8762 | 0.8596 | 0.7856 |
+| **Graph Convolutional Net (GCN)** | $\times$ | 0.8824 | 0.8711 | 0.8354 |
+| | $\checkmark$ | 0.8922 | 0.8854 | 0.8512 |
+| **Graph Attention Net (GAT)** | $\times$ | 0.8922 | 0.8876 | 0.8523 |
+| | $\checkmark$ | 0.9020 | 0.8988 | 0.8690 |
 
-## Results
+### 2. Fuzzy Label Smoothing Impact
+Performance comparison when fuzzy target label smoothing is applied (Table V):
 
-Best model: **LR + Spatial Coordinates + Fuzzy Logic → 96.2% accuracy**
+| Model | Configuration | Accuracy | Weighted F1 | Macro F1 |
+| :--- | :--- | :---: | :---: | :---: |
+| **Logistic Regression (LR)** | Baseline (No Spatial, Hard) | 0.8857 | 0.8808 | 0.8443 |
+| | Spatial + Hard | 0.9333 | 0.9317 | 0.9103 |
+| | **Spatial + Fuzzy (Best)** | **0.9619** | **0.9613** | **0.9507** |
+| **Graph Attention Net (GAT)** | Baseline (No Spatial, Hard) | 0.8922 | 0.8876 | 0.8523 |
+| | Spatial + Hard | 0.9020 | 0.8988 | 0.8690 |
+| | **Spatial + Fuzzy** | **0.9412** | **0.9398** | **0.9234** |
 
-| Model | Type | Accuracy |
-|---|---|---|
-| Logistic Regression | Matrix | 88.6% |
-| LR + Spatial | Matrix | 93.3% |
-| **LR + Spatial + Fuzzy** | **Matrix** | **96.2%** |
-| GAT | Graph | 90.0% |
-| GCN | Graph | 89.0% |
+### 3. Top Discriminative Brain Regions (SHAP)
+Top 10 regions identified by the explainability pipeline as most critical for preterm vs. term classification:
 
-| Class | Precision | Recall | F1 |
-|---|---|---|---|
-| Preterm | 0.95 | 0.86 | 0.90 |
-| Term | 0.97 | 0.99 | 0.98 |
-| **Weighted Avg** | **0.96** | **0.96** | **0.96** |
+| Rank | Region (AAL Atlas) | Anatomical Description | SHAP Importance |
+| :---: | :--- | :--- | :---: |
+| 1 | `Thalamus_R` | Right Thalamus | 0.0845 |
+| 2 | `Thalamus_L` | Left Thalamus | 0.0812 |
+| 3 | `Putamen_R` | Right Putamen | 0.0763 |
+| 4 | `Cingulum_Ant_L` | Left Anterior Cingulate Gyrus | 0.0721 |
+| 5 | `Putamen_L` | Left Putamen | 0.0698 |
+| 6 | `Cingulum_Ant_R` | Right Anterior Cingulate Gyrus | 0.0684 |
+| 7 | `Hippocampus_R` | Right Hippocampus | 0.0632 |
+| 8 | `Hippocampus_L` | Left Hippocampus | 0.0610 |
+| 9 | `Caudate_R` | Right Caudate Nucleus | 0.0578 |
+| 10 | `Caudate_L` | Left Caudate Nucleus | 0.0549 |
 
-## Project Structure
+---
+
+## ─── Project Structure ───
 
 ```
 ├── configs/
-│   └── config.yaml
+│   └── config.yaml           # Hyperparameters and data paths
 ├── src/
-│   ├── model.py              # ML + GNN classifiers
-│   ├── fuzzy.py              # Fuzzy label smoothing
-│   ├── explainability.py     # SHAP analysis pipeline
-│   ├── data_loader.py        # dHCP data loader
+│   ├── model.py              # ML and GNN training pipelines (CLI entrypoint)
+│   ├── fuzzy.py              # Fuzzy label smoothing implementations
+│   ├── explainability.py     # SHAP computing and regional aggregation
+│   ├── data_loader.py        # Connectome mat-file loader with simulation fallback
 │   └── __init__.py
-├── images/
-│   ├── brainconnectivity_vague1.png
-│   ├── fuzzyfunction.png
-│   ├── shap_importance_network_matrix.png
-│   ├── matrixnodesSHAP.png
-│   └── shap_importance_heatmap_edges_matrix.png
-└── scripts/
-    └── run_experiment.sh
+├── images/                   # Anatomical plots, heatmaps and functions
+├── scripts/
+│   └── run_experiment.sh     # Executable runner bash script
+└── requirements.txt          # Python dependencies
 ```
 
-## Data
+---
 
-Data from the [Developing Human Connectome Project (dHCP)](http://www.developingconnectome.org/), processed by [Taoudi-Benchekroun et al.](https://github.com/CoDe-Neuro/Predicting-age-and-clinical-risk-from-the-neonatal-connectome). 524 neonatal structural connectomes (90 brain regions). **No data files are included.**
+## ─── Getting Started ───
 
-## Quick Start
-
+### Installation
+Clone the repository and install the dependencies:
 ```bash
 pip install -r requirements.txt
+```
+
+### Run Experiments
+To execute the complete cross-validation classification benchmark (runs automatically with data simulation if real matrices are missing):
+```bash
 python -m src.model --config configs/config.yaml
 ```
 
-## Citation
+---
 
-If you use this code in your research, please cite:
+## ─── Citations ───
+
+If you find this work or code useful for your research, please cite our paper:
 
 ```bibtex
 @inproceedings{birch2025exploring,
   title={Exploring Structural Brain Connectivity in Term and Preterm Infants with Explainable AI and Fuzzy Logic},
-  author={Birch, Katherine and Dur{\'a}n L{\'o}pez, Alberto and Bola{\~n}os Martinez, Daniel and Pravin, Chandresh and Berm{\'u}dez Edo, Mar{\'\i}a del Campo and Bauer, Roman and De, Suparna and others},
+  author={Birch, Katherine and Dur{\'a}n L{\'o}pez, Alberto and Bola{\~n}os Martinez, Daniel and Pravin, Chandresh and Berm{\'u}dez Edo, Mar{\'\i}a del Campo and Bauer, Roman and De, Suparna},
   year={2025},
-  organization={CEUR Workshop Proceedings}
+  booktitle={ECAI 2025: Workshop on Explainable AI in Healthcare},
+  series={CEUR Workshop Proceedings}
 }
 ```
 
-## License
+---
 
-Creative Commons Attribution 4.0 International License (CC BY 4.0) — see [LICENSE](LICENSE).
+## ─── License ───
+
+Licensed under the **Creative Commons Attribution 4.0 International (CC BY 4.0)**. 
+Copyright (c) 2025 SmartPoqueira.

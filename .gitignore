@@ -12,7 +12,9 @@ ENV/
 # Data and Results
 original/
 results/
+data/
 *.csv
 
 # Paper (preserves it locally, but it should not be uploaded)
 paper/
+tests/
