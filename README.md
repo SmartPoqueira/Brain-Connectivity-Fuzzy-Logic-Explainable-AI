@@ -99,6 +99,8 @@ python -m src.model --config configs/config.yaml
 
 ## Citation
 
+If you use this code in your research, please cite:
+
 ```bibtex
 @inproceedings{birch2025exploring,
   title={Exploring Structural Brain Connectivity in Term and Preterm Infants with Explainable AI and Fuzzy Logic},
@@ -110,4 +112,4 @@ python -m src.model --config configs/config.yaml
 
 ## License
 
-MIT License — see [LICENSE](LICENSE).
+Creative Commons Attribution 4.0 International License (CC BY 4.0) — see [LICENSE](LICENSE).
