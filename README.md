@@ -9,7 +9,7 @@ Classification of **preterm vs. term infant brain structural connectivity** usin
 ## Pipeline
 
 <p align="center">
-  <img src="paper/figures/brainconnectivity_vague1.png" width="700"/>
+  <img src="images/brainconnectivity_vague1.png" width="700"/>
 </p>
 
 *End-to-end pipeline: structural connectivity matrices from dHCP → feature extraction → ML/GNN classification with fuzzy labels → SHAP-based explainability.*
@@ -25,7 +25,7 @@ Preterm birth disrupts critical neurodevelopmental processes during the final tr
 ## Fuzzy Logic
 
 <p align="center">
-  <img src="paper/figures/fuzzyfunction.png" width="400"/>
+  <img src="images/fuzzyfunction.png" width="400"/>
 </p>
 
 *Sigmoidal fuzzy membership function: $y_i^{\text{soft}} = \sigma\left(\frac{GA_i - 37}{T}\right)$. This replaces the hard binary label, reflecting the continuous nature of brain development around the 37-week boundary.*
@@ -33,8 +33,8 @@ Preterm birth disrupts critical neurodevelopmental processes during the final tr
 ## SHAP Explainability
 
 <p align="center">
-  <img src="paper/figures/shap_importance_network_matrix.png" width="450"/>
-  <img src="paper/figures/matrixnodesSHAP.png" width="450"/>
+  <img src="images/shap_importance_network_matrix.png" width="450"/>
+  <img src="images/matrixnodesSHAP.png" width="450"/>
 </p>
 
 *Left: Brain network showing edge importance from SHAP analysis. Right: Node-level aggregation highlighting thalamus, putamen, and cingulum as key discriminative regions.*
@@ -42,7 +42,7 @@ Preterm birth disrupts critical neurodevelopmental processes during the final tr
 ### SHAP Heatmap
 
 <p align="center">
-  <img src="paper/figures/shap_importance_heatmap_edges_matrix.png" width="500"/>
+  <img src="images/shap_importance_heatmap_edges_matrix.png" width="500"/>
 </p>
 
 *Heatmap of edge-level SHAP importance across all 90 brain regions.*
@@ -76,10 +76,12 @@ Best model: **LR + Spatial Coordinates + Fuzzy Logic → 96.2% accuracy**
 │   ├── explainability.py     # SHAP analysis pipeline
 │   ├── data_loader.py        # dHCP data loader
 │   └── __init__.py
-├── paper/
-│   ├── main.tex
-│   ├── references.bib
-│   └── figures/
+├── images/
+│   ├── brainconnectivity_vague1.png
+│   ├── fuzzyfunction.png
+│   ├── shap_importance_network_matrix.png
+│   ├── matrixnodesSHAP.png
+│   └── shap_importance_heatmap_edges_matrix.png
 └── scripts/
     └── run_experiment.sh
 ```
