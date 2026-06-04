@@ -1,75 +1,80 @@
-# BrainFuzzyXAI: Brain Connectivity Classification with Fuzzy Logic and Explainable AI
+# Brain Connectivity Classification with Fuzzy Logic and Explainable AI
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Conference: ECAI 2025](https://img.shields.io/badge/Conference-ECAI%202025-blue)](https://ecai2025.org/)
 
 Classification of **preterm vs. term infant brain structural connectivity** using machine learning and graph neural networks, enhanced with **fuzzy logic label smoothing** and **SHAP explainability**. Published at ECAI 2025 (CEUR Workshop Proceedings).
+
+## Pipeline
+
+<p align="center">
+  <img src="paper/figures/brainconnectivity_vague1.png" width="700"/>
+</p>
+
+*End-to-end pipeline: structural connectivity matrices from dHCP → feature extraction → ML/GNN classification with fuzzy labels → SHAP-based explainability.*
 
 ## Overview
 
 Preterm birth disrupts critical neurodevelopmental processes during the final trimester. This project uses structural connectomes (DTI-derived 90×90 adjacency matrices) from the Developing Human Connectome Project (dHCP) to classify infants as preterm or term. Key contributions:
 
 1. **Spatial coordinate augmentation** — Atlas-based centroid coordinates as node features improve LR accuracy from 88.6% to 93.3%.
-2. **Fuzzy logic label smoothing** — A sigmoidal soft target around the 37-week threshold: $y_i^{\text{soft}} = \sigma\left(\frac{GA_i - \tau}{T}\right)$, achieving **96.2% accuracy**.
-3. **SHAP explainability** — Edge-importance matrices and node-level aggregation identify key brain regions (thalamus, putamen, cingulum) consistent with neuroscience literature.
+2. **Fuzzy logic label smoothing** — A sigmoidal soft target around the 37-week threshold boosts accuracy to **96.2%**.
+3. **SHAP explainability** — Edge-importance matrices and node-level aggregation identify key brain regions consistent with neuroscience literature.
 
-## Method
+## Fuzzy Logic
 
-### Data Representation
+<p align="center">
+  <img src="paper/figures/fuzzyfunction.png" width="400"/>
+</p>
 
-Each brain is represented as:
-- **Matrix view**: Symmetric adjacency matrix $A \in \mathbb{R}^{90 \times 90}$ → upper-triangle feature vector of $d = 4{,}005$ edge weights.
-- **Graph view**: Weighted undirected graph $G = (V, E, X_v, X_e)$ with atlas-based spatial coordinates as node features.
+*Sigmoidal fuzzy membership function: $y_i^{\text{soft}} = \sigma\left(\frac{GA_i - 37}{T}\right)$. This replaces the hard binary label, reflecting the continuous nature of brain development around the 37-week boundary.*
 
-### Fuzzy Logic
+## SHAP Explainability
 
-The standard hard label at 37 weeks is replaced with:
+<p align="center">
+  <img src="paper/figures/shap_importance_network_matrix.png" width="450"/>
+  <img src="paper/figures/matrixnodesSHAP.png" width="450"/>
+</p>
 
-$$y_i^{\text{soft}} = \frac{1}{1 + \exp\left(-\frac{GA_i - 37}{T}\right)}$$
+*Left: Brain network showing edge importance from SHAP analysis. Right: Node-level aggregation highlighting thalamus, putamen, and cingulum as key discriminative regions.*
 
-where $T$ controls transition smoothness. This handles dating uncertainty and the biological continuum around the preterm/term boundary.
+### SHAP Heatmap
 
-### Models
+<p align="center">
+  <img src="paper/figures/shap_importance_heatmap_edges_matrix.png" width="500"/>
+</p>
 
-| Model | Type | Best Accuracy |
-|---|---|---|
-| Logistic Regression + Spatial | Matrix-based | 93.3% |
-| LR + Spatial + Fuzzy | Matrix-based | **96.2%** |
-| GAT | Graph-based | 90.0% |
-| GAT + Fuzzy | Graph-based | 90.0% |
-| GCN | Graph-based | 89.0% |
+*Heatmap of edge-level SHAP importance across all 90 brain regions.*
 
 ## Results
 
-Best model: **LR + Spatial Coordinates + Fuzzy Logic**
+Best model: **LR + Spatial Coordinates + Fuzzy Logic → 96.2% accuracy**
+
+| Model | Type | Accuracy |
+|---|---|---|
+| Logistic Regression | Matrix | 88.6% |
+| LR + Spatial | Matrix | 93.3% |
+| **LR + Spatial + Fuzzy** | **Matrix** | **96.2%** |
+| GAT | Graph | 90.0% |
+| GCN | Graph | 89.0% |
 
 | Class | Precision | Recall | F1 |
 |---|---|---|---|
 | Preterm | 0.95 | 0.86 | 0.90 |
 | Term | 0.97 | 0.99 | 0.98 |
-| **Overall (weighted)** | **0.96** | **0.96** | **0.96** |
-
-### SHAP Explainability
-
-Top-10 most important brain regions (consistent across LR and GAT):
-- **Thalamus R**, **Putamen R**, **Insula R**, **Frontal Mid L**
-
-Bottom-10 (least discriminative — early-maturing regions):
-- **Heschl L/R**, **Occipital Sup L**, **Paracentral Lob R**, **Palladium L**
+| **Weighted Avg** | **0.96** | **0.96** | **0.96** |
 
 ## Project Structure
 
 ```
-BrainFuzzyXAI/
-├── README.md
-├── LICENSE
-├── requirements.txt
 ├── configs/
 │   └── config.yaml
 ├── src/
-│   ├── __init__.py
 │   ├── model.py              # ML + GNN classifiers
 │   ├── fuzzy.py              # Fuzzy label smoothing
 │   ├── explainability.py     # SHAP analysis pipeline
 │   ├── data_loader.py        # dHCP data loader
-│   └── spatial.py            # Atlas coordinate extraction
+│   └── __init__.py
 ├── paper/
 │   ├── main.tex
 │   ├── references.bib
@@ -80,7 +85,7 @@ BrainFuzzyXAI/
 
 ## Data
 
-Data from the [Developing Human Connectome Project (dHCP)](http://www.developingconnectome.org/), processed by [Taoudi-Benchekroun et al.](https://github.com/CoDe-Neuro/Predicting-age-and-clinical-risk-from-the-neonatal-connectome). 524 infant structural connectomes (90 brain regions).
+Data from the [Developing Human Connectome Project (dHCP)](http://www.developingconnectome.org/), processed by [Taoudi-Benchekroun et al.](https://github.com/CoDe-Neuro/Predicting-age-and-clinical-risk-from-the-neonatal-connectome). 524 neonatal structural connectomes (90 brain regions). **No data files are included.**
 
 ## Quick Start
 
@@ -93,7 +98,7 @@ python -m src.model --config configs/config.yaml
 
 ```bibtex
 @inproceedings{birch2025exploring,
-  title={Exploring Structural Brain Connectivity in Term and Preterm Infants with Explainable AI and Fuzzy Logic},
+  title={Exploring Structural Brain Connectivity in Term and Preterm Infants with Explainable {AI} and Fuzzy Logic},
   author={Birch, Katherine and Dur{\'a}n-L{\'o}pez, Alberto and Bola{\~n}os-Mart{\'i}nez, Daniel and Pravin, Chandresh and Berm{\'u}dez-Edo, Mar{\'i}a and Bauer, Roman and De, Suparna},
   booktitle={ECAI 2025 Workshop Proceedings},
   year={2025},
