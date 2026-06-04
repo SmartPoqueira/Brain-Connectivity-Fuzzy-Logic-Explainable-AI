@@ -1,6 +1,6 @@
 # Brain Connectivity Classification with Fuzzy Logic and Explainable AI
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: CC BY 4.0](https://img.shields.io/badge/License-CC--BY--4.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
 [![Conference: ECAI 2025](https://img.shields.io/badge/Conference-ECAI%202025-blue)](https://ecai2025.org/)
 
 Classification of **preterm vs. term infant brain structural connectivity** using machine learning and graph neural networks, enhanced with **fuzzy logic label smoothing** and **SHAP explainability**. Published at ECAI 2025 (CEUR Workshop Proceedings).
