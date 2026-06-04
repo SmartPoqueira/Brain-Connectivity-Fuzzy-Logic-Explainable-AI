@@ -1,0 +1,36 @@
+seed: 42
+
+data:
+  mat_path: "data/NewStructuralConnectivity.mat"
+  atlas_path: "data/infant_atlas.nii.gz"
+  source_url: "https://github.com/CoDe-Neuro/Predicting-age-and-clinical-risk-from-the-neonatal-connectome"
+
+labels:
+  ga_threshold: 37    # Preterm if GA < 37 weeks
+  use_fuzzy: true
+  fuzzy_temperature: 1.0
+
+evaluation:
+  n_splits: 5
+  test_size: 0.20
+  stratified: true
+  metrics: [accuracy, precision, recall, f1]
+
+models:
+  ml:
+    - lr
+    - svm
+    - mlp
+    - rf
+  gnn:
+    - gat
+    - gcn
+
+spatial:
+  use_coordinates: true
+  use_node_degree: false
+  edge_threshold: 0.0
+
+undersampling: true
+
+output_dir: "results"
