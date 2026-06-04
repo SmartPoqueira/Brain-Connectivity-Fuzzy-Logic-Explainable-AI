@@ -98,9 +98,8 @@ python -m src.model --config configs/config.yaml
 
 ```bibtex
 @inproceedings{birch2025exploring,
-  title={Exploring Structural Brain Connectivity in Term and Preterm Infants with Explainable {AI} and Fuzzy Logic},
-  author={Birch, Katherine and Dur{\'a}n-L{\'o}pez, Alberto and Bola{\~n}os-Mart{\'i}nez, Daniel and Pravin, Chandresh and Berm{\'u}dez-Edo, Mar{\'i}a and Bauer, Roman and De, Suparna},
-  booktitle={ECAI 2025 Workshop Proceedings},
+  title={Exploring Structural Brain Connectivity in Term and Preterm Infants with Explainable AI and Fuzzy Logic},
+  author={Birch, Katherine and Dur{\'a}n L{\'o}pez, Alberto and Bola{\~n}os Martinez, Daniel and Pravin, Chandresh and Berm{\'u}dez Edo, Mar{\'\i}a del Campo and Bauer, Roman and De, Suparna and others},
   year={2025},
   organization={CEUR Workshop Proceedings}
 }
